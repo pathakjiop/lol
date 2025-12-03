@@ -1,40 +1,135 @@
+-------------------------
+PRC 1 – DBMS EVOLUTION
+-------------------------
+CREATE TABLE DBMS_EVOLUTION (
+  ID INT PRIMARY KEY,
+  STAGE VARCHAR(50)
+);
+INSERT INTO DBMS_EVOLUTION VALUES (1,'File System');
+INSERT INTO DBMS_EVOLUTION VALUES (2,'Hierarchical DBMS');
+INSERT INTO DBMS_EVOLUTION VALUES (3,'Relational DBMS');
+INSERT INTO DBMS_EVOLUTION VALUES (4,'Object DBMS');
+INSERT INTO DBMS_EVOLUTION VALUES (5,'NoSQL DBMS');
 
-dbms
-prc 1 dbms evolution conclusion 
+-------------------------
+PRC 2 – DDL (CREATE, ALTER, TRUNCATE, DROP, RENAME)
+-------------------------
+CREATE TABLE EMP (
+  ID INT,
+  NAME VARCHAR(50)
+);
+ALTER TABLE EMP ADD SALARY INT;
+ALTER TABLE EMP MODIFY NAME VARCHAR(100);
+ALTER TABLE EMP DROP COLUMN SALARY;
+ALTER TABLE EMP RENAME TO EMPLOYEE;
+TRUNCATE TABLE EMPLOYEE;
+DROP TABLE EMPLOYEE;
 
-prc 2 ddl create alter (add modify drop rename) truncate drop rename
+-------------------------
+PRC 3 – DML (SELECT, INSERT, UPDATE, DELETE, MERGE)
+-------------------------
+CREATE TABLE EMP (
+  ID INT,
+  NAME VARCHAR(50),
+  SALARY INT,
+  DEPTNO INT
+);
+INSERT INTO EMP VALUES (1,'RAHUL',20000,10);
+INSERT INTO EMP VALUES (2,'AMIT',25000,20);
+SELECT * FROM EMP;
+SELECT NAME, SALARY FROM EMP;
+UPDATE EMP SET SALARY = 30000 WHERE ID = 1;
+DELETE FROM EMP WHERE SALARY < 25000;
+MERGE INTO EMP T
+USING (SELECT 3 ID,'RAJU' NAME,28000 SAL,10 DNO FROM dual) S
+ON (T.ID = S.ID)
+WHEN MATCHED THEN UPDATE SET T.SALARY = S.SAL
+WHEN NOT MATCHED THEN INSERT VALUES (S.ID,S.NAME,S.SAL,S.DNO);
 
-prc 3 dml select(* few) insert(single specific &) update(single few all) delete(where few all  ) merge
+-------------------------
+PRC 4 – SELECT (OPERATORS, ALIAS, DISTINCT, CONCAT)
+-------------------------
+SELECT NAME, SALARY + 1000 AS BONUS FROM EMP;
+SELECT NAME, (SALARY * 2) + 500 AS NEWSAL FROM EMP;
+SELECT NAME AS EMPNAME, SALARY AS EMPSAL FROM EMP;
+SELECT NAME || ' earns ' || SALARY FROM EMP;
+SELECT DISTINCT DEPTNO FROM EMP;
 
-prc 4 slect * specific + - * / operator precedance parentheses as concatination mixed  concatination distincet  
+-------------------------
+PRC 5 – JOINS
+-------------------------
+-- CARTESIAN
+SELECT * FROM EMP, DEPT;
 
-prc 5 
-cartesian product selecr * from table 1, table 2 
-equi join select * from emp e dept d where edeptno = d.deptno
-non equi join select * form table1, table 2 where table1.com > table2.col
-joining select * form t1 , t2 where condition 
-loj slect * from t1 t2 where t1.col = t2.com(+)
-roj slect * from t1 t2 where t1.col(+) = t2.com
-self join select a.col, b.col orm tableA tableB where a.col = b.col
-cross join select* from t1 cross join t2
-natural join select * from t1 natural jion t2 
-using select * from t1 join t2 using (col_name)
-on slect * from t1 join t2 on t1.col = t2.col
-loj select * from table loj table on confition 
-roj --
-foj--
+-- EQUI JOIN
+SELECT e.NAME, d.DNAME
+FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO;
 
-prc 6 sum avg min max count (colum * ) distince nvl group by 
-illeagl usage  select emp_name, sum(salary) form employee;
-order by asc desc 
-having 
+-- NON-EQUI
+SELECT * FROM EMP e, DEPT d WHERE e.DEPTNO > d.DEPTNO;
 
-prc 7
-subqueries  
-in select * from empluee where salary in(select min (salary) fro empliyee group by did)
-any slect * from employee where salaru < any( select salaty whrom eployee where jid = 10) 
-all select  * from empoyee where sallary < all( select salry from empluee where jid = 10)
+-- LEFT JOIN
+SELECT e.NAME, d.DNAME
+FROM EMP e LEFT JOIN DEPT d ON e.DEPTNO = d.DEPTNO;
 
-prc 8
-not null unique primary key foreign key check
-add drop disable enable cascade viewing 
+-- RIGHT JOIN
+SELECT e.NAME, d.DNAME
+FROM EMP e RIGHT JOIN DEPT d ON e.DEPTNO = d.DEPTNO;
+
+-- FULL JOIN
+SELECT e.NAME, d.DNAME
+FROM EMP e FULL JOIN DEPT d ON e.DEPTNO = d.DEPTNO;
+
+-- SELF JOIN
+SELECT a.NAME, b.NAME
+FROM EMP a, EMP b
+WHERE a.DEPTNO = b.DEPTNO AND a.ID <> b.ID;
+
+-- CROSS JOIN
+SELECT * FROM EMP CROSS JOIN DEPT;
+
+-- NATURAL JOIN
+SELECT * FROM EMP NATURAL JOIN DEPT;
+
+-- USING
+SELECT * FROM EMP JOIN DEPT USING (DEPTNO);
+
+-- ON
+SELECT * FROM EMP JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO;
+
+-------------------------
+PRC 6 – AGGREGATES, GROUP BY, HAVING, ORDER BY, NVL
+-------------------------
+SELECT SUM(SALARY), AVG(SALARY), MIN(SALARY), MAX(SALARY), COUNT(*) FROM EMP;
+SELECT NAME, COALESCE(SALARY,0) FROM EMP;
+SELECT DEPTNO, SUM(SALARY) FROM EMP GROUP BY DEPTNO;
+SELECT DEPTNO, SUM(SALARY) FROM EMP GROUP BY DEPTNO HAVING SUM(SALARY) > 50000;
+SELECT NAME, SALARY FROM EMP ORDER BY SALARY DESC;
+
+-------------------------
+PRC 7 – SUBQUERIES (IN, ANY, ALL)
+-------------------------
+SELECT * FROM EMP WHERE SALARY IN (SELECT MIN(SALARY) FROM EMP GROUP BY DEPTNO);
+SELECT * FROM EMP WHERE SALARY < ANY (SELECT SALARY FROM EMP WHERE DEPTNO = 10);
+SELECT * FROM EMP WHERE SALARY < ALL (SELECT SALARY FROM EMP WHERE DEPTNO = 10);
+SELECT e.NAME, e.SALARY
+FROM EMP e
+WHERE e.SALARY > (SELECT AVG(SALARY) FROM EMP WHERE DEPTNO = e.DEPTNO);
+
+-------------------------
+PRC 8 – CONSTRAINTS (PK, FK, UNIQUE, CHECK)
+-------------------------
+CREATE TABLE STUDENT (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50) NOT NULL,
+  EMAIL VARCHAR(100) UNIQUE,
+  AGE INT CHECK (AGE > 0)
+);
+CREATE TABLE MARKS (
+  MID INT PRIMARY KEY,
+  ID INT,
+  MARKS INT,
+  FOREIGN KEY (ID) REFERENCES STUDENT(ID)
+);
+ALTER TABLE STUDENT ADD CONSTRAINT AGE_LIMIT CHECK (AGE < 100);
+ALTER TABLE STUDENT DROP CONSTRAINT AGE_LIMIT;
